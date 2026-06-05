@@ -5,10 +5,6 @@ import ArticleCard from '../components/ArticleCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import SectionHeader from '../components/SectionHeader'
 
-const API_KEY  = import.meta.env.VITE_NEWS_API_KEY
-const BASE_URL = import.meta.env.VITE_NEWS_BASE_URL
-
-// Mock search results
 const MOCK_SEARCH = [
   {
     source: { name: 'The Verge' },
@@ -17,15 +13,6 @@ const MOCK_SEARCH = [
     description: 'This is a mock search result since no API key is configured.',
     url: 'https://theverge.com',
     urlToImage: 'https://picsum.photos/seed/search1/800/450',
-    publishedAt: new Date().toISOString(),
-  },
-  {
-    source: { name: 'Wired' },
-    author: 'Editor',
-    title: 'Mock Result: Innovation and the Future of Tech',
-    description: 'Another placeholder result. Add your NewsAPI key in .env to see real results.',
-    url: 'https://wired.com',
-    urlToImage: 'https://picsum.photos/seed/search2/800/450',
     publishedAt: new Date().toISOString(),
   },
 ]
@@ -39,30 +26,20 @@ export default function SearchPage() {
 
   const query = searchParams.get('q') || ''
 
-  // useEffect untuk fetch saat query berubah
   useEffect(() => {
     if (!query) return
     setLoading(true)
     setSearched(true)
 
-    if (!API_KEY || API_KEY === 'your_newsapi_key_here') {
-      setTimeout(() => {
-        setArticles(MOCK_SEARCH)
-        setLoading(false)
-      }, 600)
-      return
-    }
-
     axios
-      .get(`${BASE_URL}/everything`, {
-        params: { q: query, apiKey: API_KEY, pageSize: 20, language: 'en', sortBy: 'relevancy' },
+      .get('/api/news', {
+        params: { q: query },
       })
       .then((res) => setArticles(res.data.articles.filter(a => a.title !== '[Removed]')))
       .catch(() => setArticles(MOCK_SEARCH))
       .finally(() => setLoading(false))
   }, [query])
 
-  // Event handler: onSubmit search form
   const handleSearch = (e) => {
     e.preventDefault()
     if (inputVal.trim()) setSearchParams({ q: inputVal.trim() })
@@ -72,7 +49,6 @@ export default function SearchPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="font-display font-black text-3xl text-ink-50 mb-6">Search</h1>
 
-      {/* Search input */}
       <form onSubmit={handleSearch} className="flex gap-3 mb-8">
         <input
           type="text"
